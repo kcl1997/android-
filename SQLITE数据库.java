@@ -184,3 +184,183 @@ public class DBHelper extends SQLiteOpenHelper {
 
 
 
+-------------------------------------------------------------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------------------------------------------------------------
+    ----------------------------------------------------------重构后的DBHelper----------------------------------------------------------
+    -------------------------------------------------------------------------------------------------------------------------------------
+    -------------------------------------------------------------------------------------------------------------------------------------
+
+/**
+ * 项目名: AndroidClassDemo01
+ * 包名:   kcl.com.androidclassdemo01.SQLite
+ * 文件名: MyDBHelper
+ * 创建者: kcl
+ * 创建时间：2019/5/16 1:43 PM
+ * 描述: [id,name,sex,age,class,phoneNum]
+ */
+public class MyDBHelper extends SQLiteOpenHelper {
+
+    private static final String DB_NAME = "student.db";
+    private static final String TBL_NAME = "StuTbl";
+    private SQLiteDatabase db;
+    private Context mContext;
+
+    //构造函数
+    public MyDBHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+        super(context, DB_NAME, factory, version);
+        mContext = context;
+    }
+
+
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        this.db = db;
+        String CREATE_TBL = "create table StuTbl(_id integer primary key autoincrement,name text,sex text,age text,class text,phoneNum text)";
+        db.execSQL(CREATE_TBL);
+    }
+
+    //插入
+    public void insert(StudentEntity entity){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("name",entity.getsName());
+        contentValues.put("age",entity.getsAge());
+        contentValues.put("class",entity.getsClass());
+        contentValues.put("sex",entity.getsSex());
+        contentValues.put("phoneNum",entity.getsPhoneNum());
+        db.insert(TBL_NAME,null,contentValues);
+        db.close();
+    }
+
+
+    //查询
+    public List<StudentEntity> query(){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TBL_NAME,null,null,null,null,null,null);
+        List<StudentEntity> list = new LinkedList<StudentEntity>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            StudentEntity entity = new StudentEntity();
+            entity.setsId(cursor.getString(cursor.getColumnIndex("_id")));
+            entity.setsName(cursor.getString(cursor.getColumnIndex("name")));
+            entity.setsAge(cursor.getString(cursor.getColumnIndex("age")));
+            entity.setsSex(cursor.getString(cursor.getColumnIndex("sex")));
+            entity.setsClass(cursor.getString(cursor.getColumnIndex("class")));
+            entity.setsPhoneNum(cursor.getString(cursor.getColumnIndex("phoneNum")));
+            list.add(entity);
+        }
+        return list;
+    }
+
+    //根据id查询
+    public List<StudentEntity> queryById(String _id){
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TBL_NAME,null,"_id = ?",new String[]{_id},null,null,null);
+        List<StudentEntity> list = new LinkedList<StudentEntity>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            StudentEntity entity = new StudentEntity();
+            entity.setsId(cursor.getString(cursor.getColumnIndex("_id")));
+            entity.setsName(cursor.getString(cursor.getColumnIndex("name")));
+            entity.setsAge(cursor.getString(cursor.getColumnIndex("age")));
+            entity.setsSex(cursor.getString(cursor.getColumnIndex("sex")));
+            entity.setsClass(cursor.getString(cursor.getColumnIndex("class")));
+            entity.setsPhoneNum(cursor.getString(cursor.getColumnIndex("phoneNum")));
+            list.add(entity);
+        }
+        return list;
+    }
+
+    /**
+     * 根据不同类型查询
+     * type = 1姓名
+     * type = 2 班级
+     * type = 3 手机号码
+     */
+    public List<StudentEntity> queryByType(int type,String info){
+        if(type != 1 && type != 2 && type != 3) return null;
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = null;
+        switch (type){
+            case 1:
+                //模糊查询
+                String sql = "select * from " + TBL_NAME + " where name like '%" + info + "%'";
+                cursor = db.rawQuery(sql,null);
+                break;
+            case 2:
+                cursor = db.query(TBL_NAME,null,"class=?",new String[]{info},null,null,null);
+                break;
+            case 3:
+                cursor = db.query(TBL_NAME,null,"phoneNum=?",new String[]{info},null,null,null);
+                break;
+        }
+        List<StudentEntity> list = new LinkedList<StudentEntity>();
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            StudentEntity  entity = new StudentEntity();
+            entity.setsId(cursor.getString(cursor.getColumnIndex("_id")));
+            entity.setsName(cursor.getString(cursor.getColumnIndex("name")));
+            entity.setsAge(cursor.getString(cursor.getColumnIndex("age")));
+            entity.setsSex(cursor.getString(cursor.getColumnIndex("sex")));
+            entity.setsClass(cursor.getString(cursor.getColumnIndex("class")));
+            entity.setsPhoneNum(cursor.getString(cursor.getColumnIndex("phoneNum")));
+            list.add(entity);
+        }
+        return list;
+    }
+
+    /**
+     * 根据年龄区间查询
+     *
+     */
+    public List<StudentEntity> queryByAge(String age1,String age2){
+
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TBL_NAME,null,null,null,null,null,null);
+        List<StudentEntity> list = new LinkedList<StudentEntity>();
+
+        for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+            int age = Integer.parseInt(cursor.getString(cursor.getColumnIndex("age")));
+            if(age < Integer.parseInt(age1) || age > Integer.parseInt(age2)) continue;
+            StudentEntity entity = new StudentEntity();
+            entity.setsId(cursor.getString(cursor.getColumnIndex("_id")));
+            entity.setsName(cursor.getString(cursor.getColumnIndex("name")));
+            entity.setsAge(cursor.getString(cursor.getColumnIndex("age")));
+            entity.setsSex(cursor.getString(cursor.getColumnIndex("sex")));
+            entity.setsClass(cursor.getString(cursor.getColumnIndex("class")));
+            entity.setsPhoneNum(cursor.getString(cursor.getColumnIndex("phoneNum")));
+            list.add(entity);
+        }
+        return list;
+    }
+
+
+
+    //删除
+    public void del(String _id){
+        if(db == null) db = getWritableDatabase();
+        db.delete(TBL_NAME,"_id = ?",new String[]{String.valueOf(_id)});
+
+    }
+
+    //修改数据，需要重写
+    public int updataById(String _id,String sName,String sClass,String sPhoneNum,String sAge,String sSex){
+        SQLiteDatabase db = getReadableDatabase();
+        ContentValues value = new ContentValues();
+        value.put("name", sName);
+        value.put("class", sClass);
+        value.put("age", sAge);
+        value.put("sex", sSex);
+        value.put("phoneNum",sPhoneNum);
+        return db.update("StuTbl", value, "_id=?", new String[] {_id});
+    }
+
+
+
+    //关闭数据库
+    public void close(){ if(db != null) db.close(); }
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
+}
+
+
+
