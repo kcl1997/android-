@@ -94,10 +94,10 @@ public class DBHelper extends SQLiteOpenHelper {
                 s_context = cursor.getString(contextIdx);
             }
 -------------------------------------------------------------------------------------------------------------------------------------
-            //删除数据
+            
     
     
-    
+    //删除数据
     private void initView() {
         lv_stu_info = findViewById(R.id.lv_activity_stu_list_info);
         myDBHelper = new MyDBHelper(this,null,null,1);
