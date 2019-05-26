@@ -17,6 +17,7 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DB_NAME, factory, version);
     }
 
+    //当数据库未创建时自动执行
     @Override
     public void onCreate(SQLiteDatabase db) {
         this.db = db;
@@ -31,21 +32,21 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    //查询
+    //查询返回游标
     public Cursor query(){
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TBL_NAME,null,null,null,null,null,null);
         return cursor;
     }
 
-    //根据id查询
+    //根据id查询，返回游标
     public Cursor queryById(String _id){
         SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.query(TBL_NAME,null,"_id = ?",new String[]{_id},null,null,null);
         return cursor;
     }
 
-    //修改数据
+    //修改数据，需要重写
     public int updataById(String _id,String title,String context){
         SQLiteDatabase db = getReadableDatabase();
         ContentValues value = new ContentValues();
@@ -55,7 +56,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-    //删除
+    //删除数据，根据主键_id
     public void del(int id){
         if(db == null) db = getWritableDatabase();
         db.delete(TBL_NAME,"_id = ?",new String[]{String.valueOf(id)});
@@ -67,3 +68,33 @@ public class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 }
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+            //添加数据
+            //创建ContentValues对象，封装记录信息
+            ContentValues contentValues = new ContentValues();
+            contentValues.put("title",title);
+            contentValues.put("context",context);
+            //创建数据库工具类DBHelper
+            DBHelper helper = new DBHelper(getApplicationContext(),null,null,1);
+            helper.insert(contentValues);
+            helper.close();
+
+-------------------------------------------------------------------------------------------------------------------------------------
+            //查询所有数据，遍历结果
+            //查询信息根据id
+            DBHelper myDBHelper = new DBHelper(this,null,null,1);
+            Cursor cursor = myDBHelper.queryById(s_id);
+            for(cursor.moveToFirst();!cursor.isAfterLast();cursor.moveToNext()){
+                int titleIdx = cursor.getColumnIndex("title");
+                int contextIdx = cursor.getColumnIndex("context");
+                s_title = cursor.getString(titleIdx);
+                s_context = cursor.getString(contextIdx);
+            }
+-------------------------------------------------------------------------------------------------------------------------------------
+            //删除数据
+
+
+
