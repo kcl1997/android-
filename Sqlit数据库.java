@@ -95,6 +95,22 @@ public class DBHelper extends SQLiteOpenHelper {
             }
 -------------------------------------------------------------------------------------------------------------------------------------
             //删除数据
+            dbHelper.del((int)tempId);
+-------------------------------------------------------------------------------------------------------------------------------------
+            //lsitView item_listview 数据源绑定显示数据
+            private void getData() {
+                //首先获取eventList对象
+                dbHelper = new DBHelper(this,null,null,1);
+                Cursor cursor = dbHelper.query();
+                String [] tbl_col = {"_id","title"};
+                int[] idInfo = {R.id.tv_id_item_things,R.id.tv_item_things};
+                SimpleCursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),R.layout.item_things,cursor,tbl_col,idInfo);
+                lv_menu.setAdapter(adapter);
+            }
+
+-------------------------------------------------------------------------------------------------------------------------------------
+            //更新信息
+            helper.updataById(s_id,title,context);
 
 
 
