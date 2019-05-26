@@ -108,6 +108,24 @@ public class DBHelper extends SQLiteOpenHelper {
                 lv_menu.setAdapter(adapter);
             }
 
+            //可以自定义Adapter，用来整合listView视图
+            List<StudentEntity> studentEntityList = new LinkedList<StudentEntity>();
+            myDBHelper = new MyDBHelper(this,null,null,1);
+            Cursor cursor = myDBHelper.query();
+            for(cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()){
+                StudentEntity studentEntity = new StudentEntity();
+                studentEntity.setsId(cursor.getString(cursor.getColumnIndex("_id")));
+                studentEntity.setsName(cursor.getString(cursor.getColumnIndex("name")));
+                studentEntity.setsAge(cursor.getString(cursor.getColumnIndex("age")));
+                studentEntity.setsSex(cursor.getString(cursor.getColumnIndex("sex")));
+                studentEntity.setsClass(cursor.getString(cursor.getColumnIndex("class")));
+                studentEntity.setsPhoneNum(cursor.getString(cursor.getColumnIndex("phoneNum")));
+                studentEntityList.add(studentEntity);
+            }
+
+            StudentInfoAdapter studentInfoAdapter = new StudentInfoAdapter(this,studentEntityList);
+            lv_stu_info.setAdapter(studentInfoAdapter);
+
 -------------------------------------------------------------------------------------------------------------------------------------
             //更新信息
             helper.updataById(s_id,title,context);
