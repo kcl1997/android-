@@ -95,7 +95,57 @@ public class DBHelper extends SQLiteOpenHelper {
             }
 -------------------------------------------------------------------------------------------------------------------------------------
             //删除数据
-            dbHelper.del((int)tempId);
+    
+    
+    
+    private void initView() {
+        lv_stu_info = findViewById(R.id.lv_activity_stu_list_info);
+        myDBHelper = new MyDBHelper(this,null,null,1);
+        //查询数据
+        checkStuInfo();
+
+        //listView设置删除数据
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        //设置ListView单机监听事件
+
+        lv_stu_info.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                /**
+                 * 层层获取控件的view
+                 */
+                LinearLayout layout = (LinearLayout) view;
+                CardView cardView = (CardView) layout.getChildAt(0);
+                LinearLayout layout1 = (LinearLayout) cardView.getChildAt(0);
+                LinearLayout layout2 = (LinearLayout) layout1.getChildAt(0);
+                final TextView tv_id = (TextView) layout2.getChildAt(0);
+
+                //Toast.makeText(StuListInfoDeleteActivity.this, "ID = " + tv_id.getText().toString().trim().substring(4), Toast.LENGTH_SHORT).show();
+                alertDialogBuilder.setMessage("真的要删除吗？").setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    //删除事件
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myDBHelper.del(tv_id.getText().toString().trim().substring(4));
+                        //重新查询数据
+                        checkStuInfo();
+                    }
+                }).setNegativeButton("否", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {}
+                });
+                //显示对话框
+                alertDialogBuilder.create().show();
+            }
+        });
+
+
+        /**
+         * 每次初始化数据后关闭数据库
+         */
+        myDBHelper.close();
+        
+    }
+            
 -------------------------------------------------------------------------------------------------------------------------------------
             //lsitView item_listview 数据源绑定显示数据
             private void getData() {
@@ -106,6 +156,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 int[] idInfo = {R.id.tv_id_item_things,R.id.tv_item_things};
                 SimpleCursorAdapter adapter = new SimpleCursorAdapter(getApplicationContext(),R.layout.item_things,cursor,tbl_col,idInfo);
                 lv_menu.setAdapter(adapter);
+                myDBHelper.close();
             }
 
             //可以自定义Adapter，用来整合listView视图
@@ -125,6 +176,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             StudentInfoAdapter studentInfoAdapter = new StudentInfoAdapter(this,studentEntityList);
             lv_stu_info.setAdapter(studentInfoAdapter);
+            myDBHelper.close();
 
 -------------------------------------------------------------------------------------------------------------------------------------
             //更新信息
